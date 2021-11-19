@@ -1,0 +1,190 @@
+_info : 'https://docs.cloudscripting.com/'
+version: 1.6.2
+build: 20200702
+type: update
+name: 'SoftEther VPN Server'
+id: 'SoftEtherVPNServer'
+homepage: https://jps.layershift.com/softether
+baseUrl: https://jps.layershift.com/softether
+_baseUrl: https://raw.githubusercontent.com/layershift/jps-logDNA/master
+logo: /images/SoftEtherLogo.png?_r=${fn.random}
+
+categories:
+ - apps/others
+
+description:
+  text: /texts/description.md
+  short: SoftEther VPN server.
+
+targetNodes:
+  nodeGroup: 'vds'
+
+globals:
+  message: ""
+
+settings:
+  main:
+    fields:
+    - type: string
+      name: token
+      caption: Jelatic Personal Access Token
+      hideLabel: false
+      required: true
+  reprovision:
+    fields:
+    - type: string
+      name: token
+      caption: Jelatic Personal Access Token
+      hideLabel: false
+      required: true
+      value: "${settings.token}"
+    - type: toggle
+      name: redploy
+      caption: Toggle Redeploy
+      hideLabel: false
+      value: false
+
+    
+menu:
+  - caption: Restart VPN Server
+    loadingText: Restarting..
+    confirmText: Are you sure you wish to restart SoftEther VPN server?
+    action: restartSoftEther
+  - caption: ReProvision
+    loadingText: Updating..
+    settings: reprovision
+    confirmText: Are you sure you wish to reprovision SoftEther VPN server?
+    action: install
+    successText: /text/success.md
+
+buttons:
+  - caption: Status
+    loadingText: Checking..
+    action: checkSoftEtherStatus
+  - caption: Info
+    href: https://jps.layershift.com/softether/
+  
+onAfterRedeployContainer:
+  install:
+    name: Install Action
+
+onAfterAddNode:
+  install:
+    name: Install Action
+
+onAfterCloneNodes:
+  install:
+    name: Install Action
+
+onInstall:
+  install:
+    name: Install Action
+
+onUninstall:
+  cmd [${targetNodes.nodeGroup}]:
+   - echo "uninstall";
+  sayYes: true
+  user: root
+
+actions:
+  appendMessage:
+    setGlobals:
+      message: ${globals.message}${this}
+
+  install:
+    - setGlobals:
+      - message: ""
+    - cmd [${targetNodes.join(id,)}]:
+          - echo -e "\n\nOn node ${targetNodes.join(id,)}";
+          - which rpm 2>/dev/null >/dev/null; if [ $? -gt 0 ]; then echo -e "Issue:\nrpm not found"; exit 0; fi;
+          - which systemctl 2>/dev/null >/dev/null; if [ $? -gt 0 ]; then echo -e "Issue:\nsystemctl not found"; exit 0; fi;
+          - yum -y install epel-release; if [ $? -gt 0 ]; then echo -e "\nIssue:\nCan't install epel-release"; exit 0; fi;
+          - yum -y install gcc jq dnsmasq; if [ $? -gt 0 ]; then echo -e "\nIssue:\nCan't install gcc, jq and dnsmasq"; exit 0; fi;
+          - cd /root/;
+          - wget https://jps.layershift.com/softether/src/v4.38-9760-rtm-2021.08.17-tree/Linux/SoftEther_VPN_Server/64bit_-_Intel_x64_or_AMD64/softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
+          - tar -zxf softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz;
+          - cd vpnserver;
+          - make i_read_and_agree_the_license_agreement;
+          - cd /root;
+          - mv vpnserver/ /usr/local/;
+          - wget https://jps.layershift.com/softether/scripts/softether.systemd -O /etc/systemd/system/vpnserver.service;
+          - systemctl daemon-reload;
+          - wget https://jps.layershift.com/softether/scripts/vpnserver.sh -O /usr/local/vpnserver/vpnserver.sh;
+          - chmod +x /usr/local/vpnserver/vpnserver.sh;
+          - wget https://jps.layershift.com/softether/scripts/vpnserver.dnsmasq.conf -O /etc/dnsmasq.d/vpnserver.conf;
+          - systemctl enable dnsmasq;
+          - systemctl enable vpnserver;
+          - systemctl start dnsmasq;
+          - systemctl restart vpnserver;
+          - sleep 10;
+          - wget https://jps.layershift.com/softether/scripts/softether.provision.sh -O /root/softether.provision.sh;
+          - chmod +x /root/softether.provision.sh;
+          - /root/softether.provision.sh;
+          - wget https://jps.layershift.com/softether/scripts/softether.sysctl -O /etc/sysctl.d/vpnserver.conf;
+          - wget https://jps.layershift.com/softether/scripts/japi.tar.gz -O /root/japi.tar.gz;
+          - tar -zxf /root/japi.tar.gz --directory /usr/local/vpnserver;
+          - echo "${settings.token}" > /usr/local/vpnserver/japi/token;
+          - /usr/local/vpnserver/japi/buildPUSHROUTEVar.sh;
+          - wget https://jps.layershift.com/softether/scripts/userAdd.sh -O /usr/local/vpnserver/userAdd.sh;
+          - wget https://jps.layershift.com/softether/scripts/userDel.sh -O /usr/local/vpnserver/userDel.sh;
+          - wget https://jps.layershift.com/softether/scripts/userList.sh -O /usr/local/vpnserver/userList.sh;
+          - wget https://jps.layershift.com/softether/scripts/userSetPasswd.sh -O /usr/local/vpnserver/userSetPasswd.sh;
+          - chmod +x /usr/local/vpnserver/user*;
+          - rm -f /root/softether.provision.sh;
+          - rm -f /root/japi.tar.gz;
+          - systemctl restart vpnserver dnsmasq
+      sayYes: true
+      user: root
+    - appendMessage: ${response.out}
+    - env.control.AddContainerVolume [${targetNodes.join(id,)}]:
+        path: /usr/local/vpnserver
+    - env.control.AddContainerVolume [${targetNodes.join(id,)}]:
+        path: /root/.vpn_svr.shadow
+    - env.control.AddContainerVolume [${targetNodes.join(id,)}]:
+        path: /root/.vpn_hub.shadow
+    - if (globals.message.indexOf("Issue") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+
+  restartSoftEther:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - systemctl restart vpnserver 2>&1 > /dev/null;
+          - sleep 5;
+          - systemctl status vpnserver 2>&1 > /dev/null;
+          - if [ $? -gt 0 ]; then echo -en " - On node ${@node.id}\nStatus =  "; systemctl status -n0 vpnserver; echo -e " \n\n"; fi;
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.length > 0):
+        return:
+          type: error
+          message: '${globals.message}'
+    - return:
+        type: success
+        message: 'SoftEther VPN server restart complete'
+
+  checkSoftEtherStatus:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -en " - On node ${@node.id}\nStatus =  ";
+          - systemctl status -n0 vpnserver;
+          - echo -e " \n\n";
+        user: root
+      - appendMessage: ${response.out}
+    - message: ${globals.message}
+      script: |
+        return {result: 2308, message: message.replace(/\n/g, '  \n')}
+
+responses:
+  2308:
+    type: success
+  
+  2309:
+    type: error
+
+success: /texts/success.md

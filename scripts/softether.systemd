@@ -1,0 +1,12 @@
+[Unit]
+Description=SoftEther VPN Server
+After=network.target
+Before=dnsmasq.service
+[Service]
+Type=forking
+ExecStart=/usr/local/vpnserver/vpnserver.sh
+ExecStop=/usr/local/vpnserver/vpnserver stop
+ExecStartPost=/bin/systemctl try-restart dnsmasq
+[Install]
+WantedBy=multi-user.target
+
