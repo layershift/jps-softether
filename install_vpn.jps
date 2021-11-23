@@ -1,0 +1,95 @@
+_info : 'https://docs.cloudscripting.com/'
+version: 1.6.2
+build: 20200702
+type: install
+name: 'SoftEther VPN Server'
+id: 'SoftEtherVPNServer'
+homepage: https://jps.layershift.com/softether
+baseUrl: https://jps.layershift.com/softether
+_baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/master
+logo: /images/SoftEtherLogo.png?_r=${fn.random}
+
+categories:
+ - apps/others
+
+description:
+  text: /texts/description.md
+  short: SoftEther VPN server.
+
+settings:
+  fields:
+    - type: radiolist
+      caption: Installation Mode
+      name: mode
+      default: newEnv
+      columns: 2
+      values:
+        - caption: New Environment
+          value: newEnv
+
+        - caption: Existing Environment
+          value: existingEnv
+
+      showIf:
+      #Settings for creating a new Environment
+        newEnv:
+          - caption: Environment
+            type: envname
+            name: envName
+            dependsOn: region
+      #Settings for selecting current Environment
+        existingEnv:
+          - caption: Environment
+            type: envlist
+            name: envName
+            valueField: shortdomain
+
+    - name: token
+      caption: Jelatic Personal Access Token
+      type: string
+      value: 
+      hidden: false
+      required: true
+
+onInstall:
+
+  # Create appropriate environment with settings selected in previous screen
+  - if (settings.mode == 'newEnv'):
+      install:
+        envName: ${settings.envName}
+        jps:
+         type: install
+         name: SoftEther VPN
+         nodes:
+              nodeType: centos-vps
+              displayName: SoftEther VPN
+              flexibleCloudlets: 10
+              count: 1
+              nodeGroup: vpn_vds
+              extip: true
+              skipNodeEmails: false
+
+  #Add nodes to the Environment previously selected
+  - if (settings.mode == 'existingEnv'): 
+      install:
+        envName: ${settings.envName}
+        jps:
+          type: update
+          name: add nodes
+          onInstall:
+            addNodes:
+              nodeType: centos-vps
+              displayName: SoftEther VPN
+              flexibleCloudlets: 10
+              count: 1
+              nodeGroup: vpn_vds
+              extip: true
+              skipNodeEmails: false
+
+   Once the nodes are added, it will install the Redis_ckuster package that configures the 6 Redis nodes into a cluster
+  - install: 
+      jps: ${baseUrl}/softether.jps
+      envName: ${settings.envName}
+      nodeGroup: vpn_vds
+      settings:
+        token: ${globals.token}      
