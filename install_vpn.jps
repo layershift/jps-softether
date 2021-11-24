@@ -4,8 +4,8 @@ build: 20200702
 type: install
 name: 'SoftEther VPN Server'
 id: 'SoftEtherVPNServer'
-homepage: https://jps.layershift.com/softether
-baseUrl: https://jps.layershift.com/softether
+homepage: https://github.com/layershift/jps-softether/tree/main
+baseUrl: https://github.com/layershift/jps-softether/tree/main
 _baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/master
 logo: /images/SoftEtherLogo.png?_r=${fn.random}
 
@@ -86,7 +86,7 @@ onInstall:
               extip: true
               skipNodeEmails: false
 
-   Once the nodes are added, it will install the Redis_ckuster package that configures the 6 Redis nodes into a cluster
+   #Once the nodes are added, it will install the Redis_ckuster package that configures the 6 Redis nodes into a cluster
   - install: 
       jps: ${baseUrl}/softether.jps
       envName: ${settings.envName}
