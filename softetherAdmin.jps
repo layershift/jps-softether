@@ -4,9 +4,8 @@ build: 20200702
 type: update
 name: 'SoftEther VPN Server Admin Tools'
 id: 'SoftEtherVPNServerAdminTools'
-homepage: https://jps.layershift.com/softether
-baseUrl: https://jps.layershift.com/softether
-_baseUrl: https://raw.githubusercontent.com/layershift/jps-logDNA/master
+homepage: https://github.com/layershift/jps-softether/
+baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/main
 logo: /images/SoftEtherLogo.png?_r=${fn.random}
 
 categories:
@@ -17,7 +16,7 @@ description:
   short: SoftEther VPN Server Admin Tools.
 
 targetNodes:
-  nodeGroup: 'vds'
+  nodeGroup: 'vpn_vds'
 
 globals:
   message: ""
