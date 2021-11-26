@@ -101,7 +101,7 @@ actions:
           - wget https://github.com/SoftEtherVPN/SoftEtherVPN_Stable/releases/download/v4.38-9760-rtm/softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz
           - tar -zxf softether-vpnserver-v4.38-9760-rtm-2021.08.17-linux-x64-64bit.tar.gz;
           - cd vpnserver;
-          - make i_read_and_agree_the_license_agreement;
+          - make main;
           - cd /root;
           - mv vpnserver/ /usr/local/;
           - wget ${baseUrl}/scripts/softether.systemd -O /etc/systemd/system/vpnserver.service;
