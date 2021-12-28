@@ -102,7 +102,7 @@ onInstall:
               extip: true
               # not possible in version 6.1.2
               # skipNodeEmails: false
-            script: |               
+            script: |
               return { result: 0, onAfterReturn: { 'env.control.AddNode': Array(${settings.nodesCount}).fill(JSON.parse(node)) } }
 
 
@@ -112,4 +112,4 @@ onInstall:
       envName: ${settings.envName}
       nodeGroup: vpn_vds
       settings:
-        token: ${settings.token}      
+        token: ${settings.token}
