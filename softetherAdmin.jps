@@ -1,6 +1,3 @@
-_info : 'https://docs.cloudscripting.com/'
-version: 1.6.2
-build: 20200702
 type: update
 name: 'SoftEther VPN Server Admin Tools'
 id: 'SoftEtherVPNServerAdminTools'

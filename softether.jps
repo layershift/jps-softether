@@ -1,4 +1,3 @@
-version: 1.6.2
 type: update
 name: 'SoftEther VPN Server'
 id: 'SoftEtherVPNServer'
@@ -41,25 +40,23 @@ settings:
       hideLabel: false
       value: false
 
-    
-menu:
-  - caption: Restart VPN Server
-    loadingText: Restarting..
-    confirmText: Are you sure you wish to restart SoftEther VPN server?
-    action: restartSoftEther
-  - caption: ReProvision
-    loadingText: Updating..
-    settings: reprovision
-    confirmText: Are you sure you wish to reprovision SoftEther VPN server?
-    action: install
-    successText: /text/success.md
+
 
 buttons:
   - caption: Status
     loadingText: Checking..
     action: checkSoftEtherStatus
-  - caption: Info
-    href: https://jps.layershift.com/softether/
+  - menu:
+    - caption: Restart VPN Server
+      loadingText: Restarting..
+      confirmText: Are you sure you wish to restart SoftEther VPN server?
+      action: restartSoftEther
+    - caption: ReProvision
+      loadingText: Updating..
+      settings: reprovision
+      confirmText: Are you sure you wish to reprovision SoftEther VPN server?
+      action: install
+      successText: /text/success.md
   
 onAfterRedeployContainer:
   install:
@@ -143,6 +140,19 @@ actions:
         message:  ${globals.message}
         script: |
           return {result: 2309, message: message.replace(/\n/g, '  \n')}
+
+  set-firewall-cluster:
+      api[${targetNodes.join(id,)}]:
+        - method: environment.security.addrule
+          params:
+            rule: {
+              action: "ALLOW",
+              direction: "INPUT",
+              name: "Softether",
+              src: "ANY",
+              ports: "5555"
+              }
+
 
   restartSoftEther:
     - setGlobals:

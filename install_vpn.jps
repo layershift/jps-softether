@@ -1,12 +1,8 @@
-_info : 'https://docs.cloudscripting.com/'
-version: 1.6.2
-build: 20200702
 type: install
 name: 'SoftEther VPN Server'
-id: 'SoftEtherVPNServer'
-homepage: https://github.com/layershift/jps-softether/tree/main
-baseUrl: https://github.com/layershift/jps-softether/tree/main
-_baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/master
+id: 'SoftEtherVPNServerDeploy'
+homepage: https://github.com/layershift/jps-softether/
+baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/main
 logo: /images/SoftEtherLogo.png?_r=${fn.random}
 
 categories:
