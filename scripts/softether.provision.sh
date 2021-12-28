@@ -87,6 +87,16 @@ fi
 rm -f /usr/local/vpnserver/default.conf
 
 systemctl stop vpnserver
+# make sure the service is stopped.
+for i in {1..15}; do 
+    echo -n $i;
+    systemctl is-active --quiet vpnserver; 
+    if [ $? -ne 0 ]; then 
+        break; 
+    fi;
+    sleep 1;
+done;
+echo "";
 line=$(grep -A 19 -n DDnsClient /usr/local/vpnserver/vpn_server.config | grep -m1 -B19 "}" | grep "bool Disabled" | awk -F "-" '{print $1}')
 sed $line's/false/true/' -i /usr/local/vpnserver/vpn_server.config
 line=$(grep -n DisableJsonRpcWebApi /usr/local/vpnserver/vpn_server.config |awk -F ":" '{print $1}')
@@ -95,4 +105,14 @@ sed $line's/false/true/' -i /usr/local/vpnserver/vpn_server.config
 #sed 's#\#/usr/sbin/ip#/usr/sbin/ip#g' -i /usr/local/vpnserver/vpnserver.sh
 
 systemctl start vpnserver
+# make sure the service is started.
+for i in {1..15}; do 
+    echo -n $i;
+    systemctl is-active --quiet vpnserver; 
+    if [ $? -eq 0 ]; then 
+        break; 
+    fi;
+    sleep 1;
+done;
+echo "";
 
