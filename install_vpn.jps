@@ -14,6 +14,13 @@ description:
 
 settings:
   fields:
+    - type: spinner
+      name: nodesCount
+      caption: Number of nodes
+      increment: 0
+      default: 1
+      min: 1
+      hidden: true
     - type: radiolist
       caption: Installation Mode
       name: mode
@@ -33,12 +40,25 @@ settings:
             type: envname
             name: envName
             dependsOn: region
+          - caption: Region
+            type: regionlist
+            name: region
+            disableInactive: true
+            selectFirstAvailable: true
+
       #Settings for selecting current Environment
         existingEnv:
           - caption: Environment
             type: envlist
             name: envName
             valueField: shortdomain
+
+    - caption: Cloudlets
+      type: spinner
+      name: cldts
+      increment: 2
+      default: 10
+      min: 4
 
     - name: token
       caption: Jelatic Personal Access Token
@@ -53,17 +73,18 @@ onInstall:
   - if (settings.mode == 'newEnv'):
       install:
         envName: ${settings.envName}
+        region: ${settings.region}
         jps:
-         type: install
-         name: SoftEther VPN
-         nodes:
-              nodeType: centos-vps
-              displayName: SoftEther VPN
-              flexibleCloudlets: 10
-              count: 1
-              nodeGroup: vpn_vds
-              extip: true
-              skipNodeEmails: false
+          type: install
+          name: Create environment
+          nodes:
+            nodeType: centos-vps
+            displayName: SoftEther VPN
+            flexibleCloudlets: ${settings.cldts}
+            count: ${settings.nodesCount}
+            nodeGroup: vpn_vds
+            extip: true
+            skipNodeEmails: true
 
   #Add nodes to the Environment previously selected
   - if (settings.mode == 'existingEnv'): 
@@ -73,14 +94,17 @@ onInstall:
           type: update
           name: add nodes
           onInstall:
-            addNodes:
+            node:
               nodeType: centos-vps
               displayName: SoftEther VPN
-              flexibleCloudlets: 10
-              count: 1
+              flexibleCloudlets: ${settings.cldts}
               nodeGroup: vpn_vds
               extip: true
-              skipNodeEmails: false
+              # not possible in version 6.1.2
+              # skipNodeEmails: false
+            script: |               
+              return { result: 0, onAfterReturn: { 'env.control.AddNode': Array(${settings.nodesCount}).fill(JSON.parse(node)) } }
+
 
    #Once the nodes are added, it will install the Redis_ckuster package that configures the 6 Redis nodes into a cluster
   - install: 
@@ -88,4 +112,4 @@ onInstall:
       envName: ${settings.envName}
       nodeGroup: vpn_vds
       settings:
-        token: ${globals.token}      
+        token: ${settings.token}      
