@@ -10,10 +10,10 @@ else
     freshInstall=0;
     fileLines=$(cat /root/.vpn_svr.shadow | wc -l);
     if [ $fileLines -eq 1 ]; then
-	server_passwd=$(cat /root/.vpn_svr.shadow);
-	echo "Info: Use passwor $server_passwd"
+	    server_passwd=$(cat /root/.vpn_svr.shadow);
+	    echo "Info: Use passwor $server_passwd"
     else
-	echo "Error: Server password shadow exists but invalid!"
+	    echo "Error: Server password shadow exists but invalid!"
     fi
 fi
 
@@ -24,9 +24,9 @@ else
     freshInstall=0;
     fileLines=$(cat /root/.vpn_hub.shadow | wc -l);
     if [ $fileLines -eq 1 ]; then
-	hub_passwd=$(cat  /root/.vpn_hub.shadow);
+	    hub_passwd=$(cat  /root/.vpn_hub.shadow);
     else
-	echo "Error: Hub password shadow exists but invalid!"
+	    echo "Error: Hub password shadow exists but invalid!"
     fi
 fi
 
@@ -88,6 +88,7 @@ rm -f /usr/local/vpnserver/default.conf
 
 systemctl stop vpnserver
 # make sure the service is stopped.
+echo -n "Checking vpnserver stoped state : " &&
 for i in {1..15}; do 
     echo -n $i;
     systemctl is-active --quiet vpnserver; 
@@ -95,8 +96,8 @@ for i in {1..15}; do
         break; 
     fi;
     sleep 1;
-done;
-echo "";
+done &&
+echo " .. done";
 line=$(grep -A 19 -n DDnsClient /usr/local/vpnserver/vpn_server.config | grep -m1 -B19 "}" | grep "bool Disabled" | awk -F "-" '{print $1}')
 sed $line's/false/true/' -i /usr/local/vpnserver/vpn_server.config
 line=$(grep -n DisableJsonRpcWebApi /usr/local/vpnserver/vpn_server.config |awk -F ":" '{print $1}')
@@ -106,6 +107,7 @@ sed $line's/false/true/' -i /usr/local/vpnserver/vpn_server.config
 
 systemctl start vpnserver
 # make sure the service is started.
+echo -n "Checking vpnserver started state : " &&
 for i in {1..15}; do 
     echo -n $i;
     systemctl is-active --quiet vpnserver; 
@@ -113,6 +115,6 @@ for i in {1..15}; do
         break; 
     fi;
     sleep 1;
-done;
-echo "";
+done &&
+echo " .. done";
 
