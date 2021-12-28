@@ -55,23 +55,27 @@ buttons:
       loadingText: Updating..
       settings: reprovision
       confirmText: Are you sure you wish to reprovision SoftEther VPN server?
-      action: install
+      action: doInstall
       successText: /text/success.md
+    - caption: Install AdminTools
+      loadingText: Installing..
+      confirmText: Are you sure you wish to install the Admin Tools Add-on?
+      action: installAdminTools
   
 onAfterRedeployContainer:
-  install:
+  doInstall:
     name: Install Action
 
 onAfterAddNode:
-  install:
+  doInstall:
     name: Install Action
 
 onAfterCloneNodes:
-  install:
+  doInstall:
     name: Install Action
 
 onInstall:
-  install:
+  doInstall:
     name: Install Action
 
 onUninstall:
@@ -85,7 +89,7 @@ actions:
     setGlobals:
       message: ${globals.message}${this}
 
-  install:
+  doInstall:
     - setGlobals:
       - message: ""
     - cmd [${targetNodes.join(id,)}]:
@@ -186,6 +190,12 @@ actions:
     - message: ${globals.message}
       script: |
         return {result: 2308, message: message.replace(/\n/g, '  \n')}
+
+  installAdminTools:
+    - install: 
+        jps: ${baseUrl}/softetherAdmin.jps
+        envName: ${env.envName}
+        nodeGroup: vpn_vds     
 
 responses:
   2308:
