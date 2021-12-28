@@ -109,7 +109,7 @@ actions:
           - systemctl enable dnsmasq;
           - systemctl enable vpnserver;
           - systemctl start dnsmasq;
-          - systemctl restart vpnserver;
+          - systemctl start vpnserver;
           - sleep 10;
           - wget ${baseUrl}/scripts/softether.provision.sh -O /root/softether.provision.sh;
           - chmod +x /root/softether.provision.sh;
