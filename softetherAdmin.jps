@@ -1,6 +1,5 @@
 type: update
 name: 'SoftEther VPN Server Admin Tools'
-id: 'SoftEtherVPNServerAdminTools'
 homepage: https://github.com/layershift/jps-softether/
 baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/main
 logo: /images/SoftEtherLogo.png?_r=${fn.random}
@@ -13,10 +12,6 @@ settings:
       type: string
       value: 20212128
       hidden: true
-
-targetNodes:
-  nodeGroup: 'vpn_vds'
-
 
 onInstall:
   install [vpn_vds]:
