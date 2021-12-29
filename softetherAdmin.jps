@@ -70,22 +70,22 @@ onInstall:
         loadingText: Checking..
         action: SoftEtherUserList
       - menu:
-        - caption: Add VPN User
+        - caption: Add User
           settings: UserNameAdd
           action: SoftEtherUerAdd
           confirmText: 
-          title: Add New User
+          title: Add VPN User
           submitButtonText: Add User
         - caption: Set User Password
           settings: UserNameSetPassword
           action: SoftEtherUerSetPassword
-          confirmText: 
+          confirmText: Are you sure you wish to generate a new random password for this VPN user?
           title: Set User Password
         - caption: Delete User
           settings: UserNameDel
           action: SoftEtherUerDelete
-          confirmText: Are you sure you wish to delete this user?
-          title: Delete User
+          confirmText: Are you sure you wish to delete this VPN user?
+          title: Delete VPN User
       
     onAfterRedeployContainer:
       install:
