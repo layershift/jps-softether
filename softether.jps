@@ -140,22 +140,46 @@ actions:
         path: /root/.vpn_svr.shadow
     - env.control.AddContainerVolume [${targetNodes.join(id,)}]:
         path: /root/.vpn_hub.shadow
+    - setFirewall:
     - if (globals.message.indexOf("Issue") !== -1):
         message:  ${globals.message}
         script: |
           return {result: 2309, message: message.replace(/\n/g, '  \n')}
 
-  set-firewall-cluster:
-      api[${targetNodes.join(id,)}]:
-        - method: environment.security.addrule
+  setFirewall:
+    - script: |
+        var resp = api.env.security.GetRules("${env.name}", session);
+        var rules = resp.rules;
+        for (var i = 0, n = rules.length; i < n; i++) {
+          if (rules[i].name == "Softether 5555" || rules[i].name == "Softether 500" || rules[i].name == "Softether 4500" || rules[i].name == "Allow SSH" || rules[i].name == "Allow SMTP") {
+            var deleted = api.env.security.RemoveRule("${env.name}", session, rules[i].id);
+            api.marketplace.console.WriteLog("Deleted: " + rules[i].id + " " + deleted);
+          }
+        }
+        return { 'result': 0 };
+    - api[${targetNodes.join(id,)}]:
+        - method: environment.security.addrules
           params:
-            rule: {
+            nodeGroup: vpn_vds
+            rules: [{
               action: "ALLOW",
               direction: "INPUT",
-              name: "Softether",
-              src: "ANY",
+              name: "Softether 5555",
+              src: "ALL",
               ports: "5555"
-              }
+              }, {
+              action: "ALLOW",
+              direction: "INPUT",
+              name: "Softether 500",
+              src: "ALL",
+              ports: "500"
+              }, {
+              action: "ALLOW",
+              direction: "INPUT",
+              name: "Softether 4500",
+              src: "ALL",
+              ports: "4500"
+              }]
 
 
   restartSoftEther:
