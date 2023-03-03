@@ -1,198 +1,181 @@
 type: update
 name: 'SoftEther VPN Server Admin Tools'
+id: 'SoftEtherVPNServerAdminTools'
 homepage: https://github.com/layershift/jps-softether/
 baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/main
 logo: /images/SoftEtherLogo.png?_r=${fn.random}
-version: 6.1.2
 
-settings: 
-  fields:
-    - name: adminToolsVersion
-      caption: adminToolsVersion
-      type: string
-      value: 2023030301
-      hidden: true
+categories:
+- apps/others
+
+description:
+  text: /texts/description.md
+  short: |
+            SoftEther VPN Server Admin Tools.
+            version: 2023030302
+
+targetNodes:
+  nodeGroup: 'vpn_vds'
+
+globals:
+  message: ""
+
+settings:
+  UserNameAdd:
+    fields:
+    - type: string
+      caption: Username
+      name: username
+      required: true
+  UserNameSetPassword:
+    fields:
+    - type: string
+      caption: Username
+      name: username
+      required: true
+  UserNameDel:
+    fields:
+    - type: string
+      caption: Username
+      name: username
+      required: true
+
+buttons:
+  - caption: User List
+    loadingText: Checking..
+    action: SoftEtherUserList
+  - menu:
+    - caption: Add User
+      settings: UserNameAdd
+      action: SoftEtherUerAdd
+      confirmText: 
+      title: Add VPN User
+      submitButtonText: Add User
+    - caption: Set User Password
+      settings: UserNameSetPassword
+      action: SoftEtherUerSetPassword
+      confirmText: Are you sure you wish to generate a new random password for this VPN user?
+      title: Set User Password
+    - caption: Delete User
+      settings: UserNameDel
+      action: SoftEtherUerDelete
+      confirmText: Are you sure you wish to delete this VPN user?
+      title: Delete VPN User
+  
+onAfterRedeployContainer:
+  install:
+    name: Install Action
+
+onAfterAddNode:
+  install:
+    name: Install Action
+
+onAfterCloneNodes:
+  install:
+    name: Install Action
 
 onInstall:
-  install [vpn_vds]:
-    type: update
-    name: 'SoftEther VPN Server Admin Tools'
-    id: 'SoftEtherVPNServerAdminTools'
-    homepage: https://github.com/layershift/jps-softether/
-    baseUrl: https://raw.githubusercontent.com/layershift/jps-softether/main
-    logo: /images/SoftEtherLogo.png?_r=${fn.random}
+  install:
+    name: Install Action
 
-    categories:
-    - apps/others
+onUninstall:
+  cmd [${targetNodes.nodeGroup}]:
+  - echo "uninstall";
+  sayYes: true
 
-    description:
-      text: /texts/description.md
-      short: |
-               SoftEther VPN Server Admin Tools.
-               version: ${settings.adminToolsVersion}
+actions:
+  appendMessage:
+    setGlobals:
+      message: ${globals.message}${this}
 
-    targetNodes:
-      nodeGroup: 'vpn_vds'
+  install:
+    cmd [${targetNodes.nodeGroup}]:
+    - echo "install";
+    sayYes: true
 
-    globals:
-      message: ""
+  SoftEtherUerDelete:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -e " - On node ${@node.id}\n\n ~~~~";
+          - /usr/local/vpnserver/userDel.sh "${settings.username}"
+          - echo -e "~~~~~";
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.indexOf("Error") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+    - if (globals.message.length > 0):
+        return:
+          type: success
+          message: '${globals.message}'
 
-    settings:
-      UserNameAdd:
-        fields:
-        - type: string
-          caption: Username
-          name: username
-          required: true
-      UserNameSetPassword:
-        fields:
-        - type: string
-          caption: Username
-          name: username
-          required: true
-      UserNameDel:
-        fields:
-        - type: string
-          caption: Username
-          name: username
-          required: true
+  SoftEtherUerSetPassword:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -e " - On node ${@node.id}\n\n ~~~~";
+          - /usr/local/vpnserver/userSetPasswd.sh "${settings.username}"
+          - echo -e "~~~~~";
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.indexOf("Error") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+    - if (globals.message.length > 0):
+        return:
+          type: success
+          message: '${globals.message}'
 
-    buttons:
-      - caption: User List
-        loadingText: Checking..
-        action: SoftEtherUserList
-      - menu:
-        - caption: Add User
-          settings: UserNameAdd
-          action: SoftEtherUerAdd
-          confirmText: 
-          title: Add VPN User
-          submitButtonText: Add User
-        - caption: Set User Password
-          settings: UserNameSetPassword
-          action: SoftEtherUerSetPassword
-          confirmText: Are you sure you wish to generate a new random password for this VPN user?
-          title: Set User Password
-        - caption: Delete User
-          settings: UserNameDel
-          action: SoftEtherUerDelete
-          confirmText: Are you sure you wish to delete this VPN user?
-          title: Delete VPN User
-      
-    onAfterRedeployContainer:
-      install:
-        name: Install Action
-
-    onAfterAddNode:
-      install:
-        name: Install Action
-
-    onAfterCloneNodes:
-      install:
-        name: Install Action
-
-    onInstall:
-      install:
-        name: Install Action
-
-    onUninstall:
-      cmd [${targetNodes.nodeGroup}]:
-      - echo "uninstall";
-      sayYes: true
-
-    actions:
-      appendMessage:
-        setGlobals:
-          message: ${globals.message}${this}
-
-      install:
-        cmd [${targetNodes.nodeGroup}]:
-        - echo "install";
-        sayYes: true
-
-      SoftEtherUerDelete:
-        - setGlobals:
-          - message: ""
-        - forEach(node:targetNodes):
-          - cmd [${@node.id}]:
-              - echo -e " - On node ${@node.id}\n\n ~~~~";
-              - /usr/local/vpnserver/userDel.sh "${settings.username}"
-              - echo -e "~~~~~";
-            user: root
-          - appendMessage: ${response.out}
-        - if (globals.message.indexOf("Error") !== -1):
-            message:  ${globals.message}
-            script: |
-              return {result: 2309, message: message.replace(/\n/g, '  \n')}
-        - if (globals.message.length > 0):
-            return:
-              type: success
-              message: '${globals.message}'
-
-      SoftEtherUerSetPassword:
-        - setGlobals:
-          - message: ""
-        - forEach(node:targetNodes):
-          - cmd [${@node.id}]:
-              - echo -e " - On node ${@node.id}\n\n ~~~~";
-              - /usr/local/vpnserver/userSetPasswd.sh "${settings.username}"
-              - echo -e "~~~~~";
-            user: root
-          - appendMessage: ${response.out}
-        - if (globals.message.indexOf("Error") !== -1):
-            message:  ${globals.message}
-            script: |
-              return {result: 2309, message: message.replace(/\n/g, '  \n')}
-        - if (globals.message.length > 0):
-            return:
-              type: success
-              message: '${globals.message}'
-
-      SoftEtherUerAdd:
-        - setGlobals:
-          - message: ""
-        - forEach(node:targetNodes):
-          - cmd [${@node.id}]:
-              - echo -e " - On node ${@node.id}\n\n ~~~~";
-              - /usr/local/vpnserver/userAdd.sh "${settings.username}"
-              - echo -e "~~~~~";
-            user: root
-          - appendMessage: ${response.out}
-        - if (globals.message.indexOf("Error") !== -1):
-            message:  ${globals.message}
-            script: |
-              return {result: 2309, message: message.replace(/\n/g, '  \n')}
-        - if (globals.message.length > 0):
-            return:
-              type: success
-              message: '${globals.message}'
+  SoftEtherUerAdd:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -e " - On node ${@node.id}\n\n ~~~~";
+          - /usr/local/vpnserver/userAdd.sh "${settings.username}"
+          - echo -e "~~~~~";
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.indexOf("Error") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+    - if (globals.message.length > 0):
+        return:
+          type: success
+          message: '${globals.message}'
 
 
-      SoftEtherUserList:
-        - setGlobals:
-          - message: ""
-        - forEach(node:targetNodes):
-          - cmd [${@node.id}]:
-              - echo -e " - On node ${@node.id}\nConfigured users \n ~~~~";
-              - /usr/local/vpnserver/userList.sh 2>&1 > /dev/null;
-              - if [ $? -eq 0 ]; then echo -e "$(/usr/local/vpnserver/userList.sh  | grep "User Name" | awk -F "|" '{print $NF}' | tr " " "\n")"; echo -e " \n"; else echo -e "Error=Failed to fetch data\n"; fi;
-              - echo -e "~~~~~";
-            user: root
-          - appendMessage: ${response.out}
-        - if (globals.message.indexOf("Error") !== -1):
-            message:  ${globals.message}
-            script: |
-              return {result: 2309, message: message.replace(/\n/g, '  \n')}
-        - if (globals.message.length > 0):
-            return:
-              type: success
-              message: '${globals.message}'
-        
-    responses:
-      2308:
-        type: success
-      
-      2309:
-        type: error
+  SoftEtherUserList:
+    - setGlobals:
+      - message: ""
+    - forEach(node:targetNodes):
+      - cmd [${@node.id}]:
+          - echo -e " - On node ${@node.id}\nConfigured users \n ~~~~";
+          - /usr/local/vpnserver/userList.sh 2>&1 > /dev/null;
+          - if [ $? -eq 0 ]; then echo -e "$(/usr/local/vpnserver/userList.sh  | grep "User Name" | awk -F "|" '{print $NF}' | tr " " "\n")"; echo -e " \n"; else echo -e "Error=Failed to fetch data\n"; fi;
+          - echo -e "~~~~~";
+        user: root
+      - appendMessage: ${response.out}
+    - if (globals.message.indexOf("Error") !== -1):
+        message:  ${globals.message}
+        script: |
+          return {result: 2309, message: message.replace(/\n/g, '  \n')}
+    - if (globals.message.length > 0):
+        return:
+          type: success
+          message: '${globals.message}'
+    
+responses:
+  2308:
+    type: success
+  
+  2309:
+    type: error
 
-    success: /texts/success.md
+success: /texts/success.md
