@@ -10,7 +10,7 @@ settings:
     - name: adminToolsVersion
       caption: adminToolsVersion
       type: string
-      value: 20212128
+      value: 2023030301
       hidden: true
 
 onInstall:
@@ -38,7 +38,6 @@ onInstall:
       message: ""
 
     settings:
-      main:
       UserNameAdd:
         fields:
         - type: string
@@ -57,8 +56,6 @@ onInstall:
           caption: Username
           name: username
           required: true
-
-
 
     buttons:
       - caption: User List
@@ -102,7 +99,6 @@ onInstall:
       cmd [${targetNodes.nodeGroup}]:
       - echo "uninstall";
       sayYes: true
-      user: root
 
     actions:
       appendMessage:
@@ -110,6 +106,9 @@ onInstall:
           message: ${globals.message}${this}
 
       install:
+        cmd [${targetNodes.nodeGroup}]:
+        - echo "install";
+        sayYes: true
 
       SoftEtherUerDelete:
         - setGlobals:
